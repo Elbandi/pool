@@ -25,7 +25,7 @@ type Job struct {
 	Err       error
 	added     chan bool // used by Pool.Add to wait for the supervisor
 	Worker_id uint
-	Job_id    uint64 // will wrap around on overflow
+	Job_id    uint32 // will wrap around on overflow
 }
 
 // stats is a structure holding statistical data about the pool.
@@ -56,7 +56,7 @@ type Pool struct {
 	supervisor_kill_pipe chan bool
 	worker_wg            sync.WaitGroup
 	supervisor_wg        sync.WaitGroup
-	next_job_id          uint64
+	next_job_id          uint32
 }
 
 // subworker catches any panic while running the job.
@@ -238,8 +238,8 @@ func (pool *Pool) Add(f func(...interface{}) interface{}, args ...interface{}) {
 }
 
 // job IDs start from 1
-func (pool *Pool) getNextJobId() uint64 {
-	return atomic.AddUint64(&pool.next_job_id, 1)
+func (pool *Pool) getNextJobId() uint32 {
+	return atomic.AddUint32(&pool.next_job_id, 1)
 }
 
 // Wait blocks until all the jobs in the Pool are done.
